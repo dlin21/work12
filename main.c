@@ -9,16 +9,16 @@ int main(int argc, char *argv[]) {
   char FILE_PATH[1000];
   if (argc > 1) strcpy(FILE_PATH,argv[1]);
   else {
-    printf("Enter a directory: ");
+    printf("Enter a directory:");
     int err = read(STDIN_FILENO, FILE_PATH, sizeof(FILE_PATH));
-    if (err == -1) printf("error: %s", strerror(errno));
+    if (err == -1) printf("Error %d: %s", errno, strerror(errno));
     FILE_PATH[strlen(FILE_PATH) - 1] = 0;
   }
   
   DIR *dir;
   struct dirent *d;
   struct stat stats;
-  long long file_size;
+  long long filesizes;
 
   dir = opendir(FILE_PATH);
   if (!dir) {
@@ -29,11 +29,11 @@ int main(int argc, char *argv[]) {
   while ((d=readdir(dir))!=NULL){
     if(d->d_type == 8) {
       stat(d->d_name, &stats);
-      file_size+=stats.st_size;
+      filesizes+=stats.st_size;
     }
   }
   printf("Statistics for directory: %s\n", FILE_PATH);
-  printf("Total Directory Size: %lld Bytes\n", file_size);
+  printf("Total Directory Size: %lld Bytes\n", filesizes);
 
   rewinddir(dir);
   printf("Directories: \n");
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
   while ((d=readdir(dir))!=NULL){
     if(d->d_type == 8) {
       stat(d->d_name, &stats);
-      file_size+=stats.st_size;
+      filesizes+=stats.st_size;
       printf("\t%s\n",d->d_name);
     }
   }
