@@ -11,29 +11,29 @@ int main(int argc, char *argv[]) {
   else {
     printf("Enter a directory: ");
     int err = read(STDIN_FILENO, FILE_PATH, sizeof(FILE_PATH));
-    if (err == -1) printf("Error %d: %s", errno, strerror(errno));
+    if (err == -1) printf("error: %s", strerror(errno));
     FILE_PATH[strlen(FILE_PATH) - 1] = 0;
   }
   
   DIR *dir;
   struct dirent *d;
   struct stat stats;
-  long long filesizes;
+  long long file_size;
 
   dir = opendir(FILE_PATH);
   if (!dir) {
-    printf("Error %d: %s", errno, strerror(errno));
+    printf("error: %s", strerror(errno));
     return 0;
   }
 
   while ((d=readdir(dir))!=NULL){
     if(d->d_type == 8) {
       stat(d->d_name, &stats);
-      filesizes+=stats.st_size;
+      file_size+=stats.st_size;
     }
   }
   printf("Statistics for directory: %s\n", FILE_PATH);
-  printf("Total Directory Size: %lld Bytes\n", filesizes);
+  printf("Total Directory Size: %lld Bytes\n", file_size);
 
   rewinddir(dir);
   printf("Directories: \n");
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
   while ((d=readdir(dir))!=NULL){
     if(d->d_type == 8) {
       stat(d->d_name, &stats);
-      filesizes+=stats.st_size;
+      file_size+=stats.st_size;
       printf("\t%s\n",d->d_name);
     }
   }
