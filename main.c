@@ -1,64 +1,57 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h>
-#include <dirent.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/errno.h>
+#include <dirent.h>
+#include <string.h>
+#include <errno.h>
+#include <unistd.h>
 
-//argc: number of command line args
-//argv: array of command line args as strings
-int main(int argc, char* argv[]){
-  char buffer[100];
-
-  if(argc > 1) strcpy(buffer, argv[1]);
-  else{
-    printf("Enter a directory: ");
-    //fgets reads in data from file stream and stores it as strings
-    fgets(buffer, sizeof(buffer), stdin);
+int main(int argc, char *argv[]) {
+  char buffer[1000];
+  if (argc > 1) strcpy(buffer, argv[1]);
+  else {
+    printf("Enter a directory:\n");
+    int err = read(STDIN_FILENO, buffer, sizeof(buffer));
+    if (err == -1){
+      printf("error: %s", strerror(errno));
+      return 0;
+    }
+    buffer[strlen(buffer) - 1] = 0;
   }
-
-
+    
   DIR *dir;
-  //struct dirent contains the information stored in a directory file
-  struct dirent *entry;
+  struct dirent *d;
   struct stat file;
-  int file_size = 0;
+  long long file_size;
 
-  //open directories
   dir = opendir(buffer);
-  if(!dir){
+  if (!dir) {
     printf("error: %s", strerror(errno));
-    return -1;
+    return 0;
   }
 
-  while(entry){
-    if(entry->d_type == 8){
-      stat(entry->d_name, &file);
-      file_size += file.st_size;
+  while ((d=readdir(dir))!=NULL){
+    if(d->d_type == 8) {
+      stat(d->d_name, &file);
+      file_size+=file.st_size;
     }
   }
   printf("Statistics for directory: %s\n", buffer);
-  printf("Total Directory Size: %d Bytes", file_size);
+  printf("Total Directory Size: %lld Bytes\n", file_size);
 
+  rewinddir(dir);
   printf("Directories: \n");
-  rewinddir(dir);
-  while(entry){
-    // 4 is directory
-    if(entry->d_type == 4) printf("\t%s\n", entry->d_name);
+  while ((d=readdir(dir))!= NULL){
+    if(d->d_type == 4) printf("\t%s\n", d->d_name);
   }
 
+  rewinddir(dir);
   printf("Regular Files: \n");
-  //rewinddir resets the directory stream of d to the beginning
-  rewinddir(dir);
-  while(entry){
-    // 8 is regular file
-    if(entry->d_type == 8) printf("\t%s\n", entry->d_name);
+  while ((d=readdir(dir)) != NULL){
+    if(d->d_type == 8) {
+      stat(d->d_name, &file);
+      file_size += file.st_size;
+      printf("\t%s\n", d->d_name);
+    }
   }
-
-  
-  closedir(dir);
   return 0;
 }
