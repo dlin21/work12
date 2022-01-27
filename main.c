@@ -6,13 +6,13 @@
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
-  char FILE_PATH[1000];
-  if (argc > 1) strcpy(FILE_PATH,argv[1]);
+  char buffer[1000];
+  if (argc > 1) strcpy(buffer,argv[1]);
   else {
-    printf("Enter a directory:");
-    int err = read(STDIN_FILENO, FILE_PATH, sizeof(FILE_PATH));
+    printf("Enter a directory: \n");
+    int err = read(STDIN_FILENO, buffer, sizeof(buffer));
     if (err == -1) printf("Error %d: %s", errno, strerror(errno));
-    FILE_PATH[strlen(FILE_PATH) - 1] = 0;
+    buffer[strlen(FILE_PATH) - 1] = 0;
   }
   
   DIR *dir;
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
   struct stat stats;
   long long filesizes;
 
-  dir = opendir(FILE_PATH);
+  dir = opendir(buffer);
   if (!dir) {
     printf("error: %s", strerror(errno));
     return 0;
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
       filesizes+=stats.st_size;
     }
   }
-  printf("Statistics for directory: %s\n", FILE_PATH);
+  printf("Statistics for directory: %s\n", buffer);
   printf("Total Directory Size: %lld Bytes\n", filesizes);
 
   rewinddir(dir);
