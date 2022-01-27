@@ -1,5 +1,15 @@
- all: main.c
-	gcc main.c
+all: main.o
+	gcc -o program main.o
+
+main.o: main.c
+	gcc -c main.c
 
 run:
-	./a.out
+	./program
+
+clean:
+	rm *.o
+	rm program
+
+comprun: all
+	./program
