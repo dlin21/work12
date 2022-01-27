@@ -1,55 +1,46 @@
-#include <stdio.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
+#include<stdio.h>
+#include<dirent.h>
+#include<string.h>
+#include<errno.h>
+#include<sys/stat.h>
 
-int main(int argc, char *argv[]) {
-  char FILE_PATH[1000];
-  if (argc > 1) strcpy(FILE_PATH,argv[1]);
-  else {
-    printf("Enter a directory:");
-    int err = read(STDIN_FILENO, FILE_PATH, sizeof(FILE_PATH));
-    if (err == -1) printf("Error %d: %s", errno, strerror(errno));
-    FILE_PATH[strlen(FILE_PATH) - 1] = 0;
-  }
-  
-  DIR *dir;
-  struct dirent *d;
-  struct stat stats;
-  long long filesizes;
+int print_dir(char open[100], char str_dir[100], char str_file[100]){ 
+    DIR *d = opendir(open);
+    if (errno != 0) { 
+        printf("%s\n", strerror(errno));
+        return -1;
+    }
+    struct dirent * dir;
+    int size = 0;
+    while((dir = readdir(d)) != NULL){
+        struct stat file;
+        stat(dir->d_name, &file);
+        if(dir->d_type == 4){
+            printf("\t%s", strcat(str_dir, "\n"));
+            strcat(str_dir, dir->d_name);
+        } else {
+            printf("\t%s", strcat(str_file,"\n"));
+            strcat(str_file, dir->d_name);
+        }
+        size += file.st_size;
+    }
+    return size;
+}
 
-  dir = opendir(FILE_PATH);
-  if (!dir) {
-    printf("error: %s", strerror(errno));
+int main(int argc, char * argv[]){ 
+    char str_dir[100] = "";
+    char str_file[100] = "";
+    char buffer[100] = "";
+    if(argc <= 1){
+        printf("Statistics for directory:\n ");
+        fgets(buffer, sizeof(buffer), stdin);
+        buffer[strlen(buffer)-1] = 0;
+    } else {
+        strcpy(buffer, argv[1]);
+    }
+    int x = print_dir(buffer, str_dir, str_file);
+    printf("Total Directory Size: %ul Bytes\n", x);
+    printf("Directories: %s\n", str_dir);
+    printf("Regular Files: %s\n", str_file);
     return 0;
-  }
-
-  while ((d=readdir(dir))!=NULL){
-    if(d->d_type == 8) {
-      stat(d->d_name, &stats);
-      filesizes+=stats.st_size;
-    }
-  }
-  printf("Statistics for directory: %s\n", FILE_PATH);
-  printf("Total Directory Size: %lld Bytes\n", filesizes);
-
-  rewinddir(dir);
-  printf("Directories: \n");
-  while ((d=readdir(dir))!=NULL){
-    if(d->d_type == 4) printf("\t%s\n",d->d_name);
-  }
-
-  rewinddir(dir);
-  printf("Regular Files: \n");
-  while ((d=readdir(dir))!=NULL){
-    if(d->d_type == 8) {
-      stat(d->d_name, &stats);
-      filesizes+=stats.st_size;
-      printf("\t%s\n",d->d_name);
-    }
-  }
-
-  return 0;
 }
