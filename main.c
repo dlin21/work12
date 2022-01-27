@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
   char FILE_PATH[1000];
   if (argc > 1) strcpy(FILE_PATH,argv[1]);
   else {
-    printf("Enter a directory:\n");
+    printf("Enter a directory: ");
     int err = read(STDIN_FILENO, FILE_PATH, sizeof(FILE_PATH));
     if (err == -1) printf("Error %d: %s", errno, strerror(errno));
     FILE_PATH[strlen(FILE_PATH) - 1] = 0;
