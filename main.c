@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     printf("Enter a directory: \n");
     int err = read(STDIN_FILENO, buffer, sizeof(buffer));
     if (err == -1) printf("Error %d: %s", errno, strerror(errno));
-    buffer[strlen(FILE_PATH) - 1] = 0;
+    buffer[strlen(buffer) - 1] = 0;
   }
   
   DIR *dir;
